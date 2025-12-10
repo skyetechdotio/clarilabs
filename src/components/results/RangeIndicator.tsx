@@ -82,27 +82,31 @@ export function RangeIndicator({
     critical: 'bg-danger',
   };
 
-  const height = compact ? 'h-2' : 'h-3';
-
   return (
     <div className={`w-full ${className}`}>
-      {/* Range bar */}
-      <div className={`relative ${height} bg-neutral-200 rounded-full overflow-hidden`}>
-        {/* Normal range zone */}
+      {/* Container with enough height for the marker to not be clipped */}
+      <div className="relative h-5">
+        {/* The bar - centered vertically in the container */}
         <div
-          className="absolute top-0 bottom-0 bg-success/30"
-          style={{
-            left: `${normalZoneStart}%`,
-            width: `${normalZoneWidth}%`,
-          }}
-        />
+          className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 ${compact ? 'h-2' : 'h-3'} bg-neutral-200 rounded-full`}
+        >
+          {/* Normal range zone - inside the bar */}
+          <div
+            className="absolute top-0 bottom-0 bg-success/30 rounded-full"
+            style={{
+              left: `${normalZoneStart}%`,
+              width: `${normalZoneWidth}%`,
+            }}
+          />
+        </div>
 
-        {/* Value marker */}
+        {/* Value marker - also centered vertically, sits on top of bar */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full ${statusColors[status]} border-2 border-white shadow-md transition-all duration-300`}
+          className={`absolute ${compact ? 'w-3 h-3' : 'w-4 h-4'} rounded-full ${statusColors[status]} border-2 border-white shadow-md`}
           style={{
             left: `${position}%`,
-            transform: `translateX(-50%) translateY(-50%)`,
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
           }}
         />
       </div>

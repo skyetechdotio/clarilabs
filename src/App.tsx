@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LoadingPage } from './pages/LoadingPage';
+import { WalkthroughPage } from './pages/WalkthroughPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TestDetailPage } from './pages/TestDetailPage';
 import { HistoryPage } from './pages/HistoryPage';
@@ -8,27 +9,25 @@ import { LanguageProvider } from './context/LanguageContext';
 
 function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
-  const [targetPath, setTargetPath] = useState<string | null>(null);
   const location = useLocation();
 
+  // Reset loading state if user navigates away and back
   useEffect(() => {
-    // On initial load or refresh, show loading screen
-    // Store the intended destination
-    if (isLoading && location.pathname !== '/') {
-      setTargetPath(location.pathname);
-    }
-  }, []);
+    // Could use location to store intended destination if needed
+  }, [location]);
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
   };
 
   if (isLoading) {
-    return <LoadingPage onComplete={handleLoadingComplete} targetPath={targetPath || '/results'} />;
+    // After loading, go to walkthrough (which then goes to dashboard)
+    return <LoadingPage onComplete={handleLoadingComplete} targetPath="/walkthrough" />;
   }
 
   return (
     <Routes>
+      <Route path="/walkthrough" element={<WalkthroughPage />} />
       <Route path="/results" element={<DashboardPage />} />
       <Route path="/results/:testId" element={<TestDetailPage />} />
       <Route path="/history" element={<HistoryPage />} />
