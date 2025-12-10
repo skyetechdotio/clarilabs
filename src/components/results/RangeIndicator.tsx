@@ -29,7 +29,7 @@ export function RangeIndicator({
   }, [low, high]);
 
   // Calculate position and range for visualization
-  const { position, displayMin, displayMax, normalZoneStart, normalZoneWidth } = useMemo(() => {
+  const { position, normalZoneStart, normalZoneWidth } = useMemo(() => {
     let displayMin: number;
     let displayMax: number;
     let normalStart: number;
@@ -70,8 +70,6 @@ export function RangeIndicator({
 
     return {
       position: Math.min(98, Math.max(2, position)),
-      displayMin,
-      displayMax,
       normalZoneStart: normalStart,
       normalZoneWidth: normalWidth,
     };
@@ -85,18 +83,6 @@ export function RangeIndicator({
   };
 
   const height = compact ? 'h-2' : 'h-3';
-
-  // Format the range label
-  const getRangeLabel = () => {
-    if (rangeType === 'both') {
-      return `${low} - ${high}`;
-    } else if (rangeType === 'high-only') {
-      return `< ${high}`;
-    } else if (rangeType === 'low-only') {
-      return `> ${low}`;
-    }
-    return '';
-  };
 
   return (
     <div className={`w-full ${className}`}>

@@ -1,13 +1,14 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Calendar, User, Stethoscope, AlertCircle, CheckCircle, Phone, MapPin, Clock, Mail, Building } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Stethoscope, AlertCircle, CheckCircle, Phone, MapPin, Clock, Mail, Building, Share2, MessageCircle, Users, Globe, ChevronDown, Sparkles } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { TestCard } from '../components/results/TestCard';
 import { patient, labCategories, getSummaryStats, getFlaggedTests } from '../data/mockLabResults';
 
-// Mock provider data
+// Mock provider data with image URL
 const providerInfo = {
   name: 'Dr. James Chen',
   title: 'Internal Medicine',
@@ -18,28 +19,182 @@ const providerInfo = {
   email: 'dr.chen@sunrisemedical.com',
   hours: 'Mon-Fri: 8:00 AM - 5:00 PM',
   nextAvailable: 'Tomorrow at 2:30 PM',
-  imageUrl: null, // Could add a placeholder image
+  imageUrl: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face',
 };
+
+// Language options for translation
+const languages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
+];
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const stats = getSummaryStats();
   const flaggedTests = getFlaggedTests();
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(languages[0]);
+  const [isTranslating, setIsTranslating] = useState(false);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
-      weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
   };
 
+  const handleShare = (method: string) => {
+    setShowShareMenu(false);
+    // Simulate share action
+    alert(`Sharing results via ${method}...`);
+  };
+
+  const handleLanguageChange = (language: typeof languages[0]) => {
+    setShowLanguageMenu(false);
+    if (language.code !== currentLanguage.code) {
+      setIsTranslating(true);
+      // Simulate AI translation
+      setTimeout(() => {
+        setCurrentLanguage(language);
+        setIsTranslating(false);
+      }, 1500);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
+      {/* Translation Loading Overlay */}
+      <AnimatePresence>
+        {isTranslating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center gap-4"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              >
+                <Sparkles className="w-10 h-10 text-primary" />
+              </motion.div>
+              <p className="text-text-primary font-medium">AI is translating your results...</p>
+              <p className="text-sm text-text-secondary">This may take a moment</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Top Action Bar */}
+        <div className="flex items-center justify-end gap-3 mb-4">
+          {/* Language Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            >
+              <Sparkles className="w-4 h-4 text-primary" />
+              <Globe className="w-4 h-4 text-text-secondary" />
+              <span className="text-sm font-medium">{currentLanguage.flag} {currentLanguage.name}</span>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </button>
+
+            <AnimatePresence>
+              {showLanguageMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 z-20"
+                >
+                  <div className="px-3 py-2 border-b border-neutral-100">
+                    <div className="flex items-center gap-2 text-xs text-text-muted">
+                      <Sparkles className="w-3 h-3 text-primary" />
+                      <span>AI-Powered Translation</span>
+                    </div>
+                  </div>
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang)}
+                      className={`w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-2 ${
+                        currentLanguage.code === lang.code ? 'bg-primary/5 text-primary' : ''
+                      }`}
+                    >
+                      <span>{lang.flag}</span>
+                      <span className="text-sm">{lang.name}</span>
+                      {currentLanguage.code === lang.code && (
+                        <CheckCircle className="w-4 h-4 ml-auto" />
+                      )}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Share Button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              <Share2 className="w-4 h-4" />
+              <span className="text-sm font-medium">Share Results</span>
+            </button>
+
+            <AnimatePresence>
+              {showShareMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 z-20"
+                >
+                  <div className="px-3 py-2 border-b border-neutral-100">
+                    <p className="text-xs text-text-muted">Share with family or caregivers</p>
+                  </div>
+                  <button
+                    onClick={() => handleShare('Email')}
+                    className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
+                  >
+                    <Mail className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm">Send via Email</span>
+                  </button>
+                  <button
+                    onClick={() => handleShare('Text Message')}
+                    className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
+                  >
+                    <MessageCircle className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm">Send via Text</span>
+                  </button>
+                  <button
+                    onClick={() => handleShare('Family Portal')}
+                    className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
+                  >
+                    <Users className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm">Add to Family Portal</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Content */}
           <main className="flex-1 min-w-0">
@@ -76,9 +231,11 @@ export function DashboardPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <User className="w-5 h-5 text-primary" />
-                    </div>
+                    <img
+                      src={providerInfo.imageUrl}
+                      alt={providerInfo.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
                     <div>
                       <p className="text-sm text-text-muted">Ordered By</p>
                       <p className="font-medium text-text-primary">{patient.orderingPhysician}</p>
@@ -261,11 +418,11 @@ export function DashboardPage() {
                 <CardContent>
                   {/* Provider Avatar & Name */}
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary/30 to-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-xl font-semibold text-primary">
-                        {providerInfo.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
+                    <img
+                      src={providerInfo.imageUrl}
+                      alt={providerInfo.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
                     <div>
                       <h3 className="font-semibold text-text-primary">{providerInfo.name}</h3>
                       <p className="text-sm text-text-secondary">{providerInfo.title}</p>
