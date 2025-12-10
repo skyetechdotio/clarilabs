@@ -3,39 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Sparkles, ListChecks, Shield, CheckCircle } from 'lucide-react';
 import { ProgressBar } from '../components/ui/ProgressBar';
-
-const loadingSteps = [
-  {
-    icon: Heart,
-    message: "We're here for you",
-    subMessage: "Taking a moment to understand your results",
-    duration: 2000
-  },
-  {
-    icon: Sparkles,
-    message: "Making sense of the numbers",
-    subMessage: "Translating medical data into clear insights",
-    duration: 2200
-  },
-  {
-    icon: ListChecks,
-    message: "Organizing what matters",
-    subMessage: "Highlighting what's important for you to know",
-    duration: 2000
-  },
-  {
-    icon: Shield,
-    message: "Preparing your personalized guide",
-    subMessage: "Almost ready to walk you through everything",
-    duration: 1800
-  },
-  {
-    icon: CheckCircle,
-    message: "All set!",
-    subMessage: "Your results are ready to explore",
-    duration: 1000
-  },
-];
+import { useLanguage } from '../context/LanguageContext';
 
 interface LoadingPageProps {
   onComplete?: () => void;
@@ -44,8 +12,42 @@ interface LoadingPageProps {
 
 export function LoadingPage({ onComplete, targetPath = '/results' }: LoadingPageProps) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
+
+  const loadingSteps = [
+    {
+      icon: Heart,
+      message: t('loading.step1.title'),
+      subMessage: t('loading.step1.subtitle'),
+      duration: 2000
+    },
+    {
+      icon: Sparkles,
+      message: t('loading.step2.title'),
+      subMessage: t('loading.step2.subtitle'),
+      duration: 2200
+    },
+    {
+      icon: ListChecks,
+      message: t('loading.step3.title'),
+      subMessage: t('loading.step3.subtitle'),
+      duration: 2000
+    },
+    {
+      icon: Shield,
+      message: t('loading.step4.title'),
+      subMessage: t('loading.step4.subtitle'),
+      duration: 1800
+    },
+    {
+      icon: CheckCircle,
+      message: t('loading.step5.title'),
+      subMessage: t('loading.step5.subtitle'),
+      duration: 1000
+    },
+  ];
 
   useEffect(() => {
     let stepTimeout: ReturnType<typeof setTimeout>;
@@ -192,7 +194,7 @@ export function LoadingPage({ onComplete, targetPath = '/results' }: LoadingPage
         className="absolute bottom-8 text-center"
       >
         <p className="text-sm text-text-muted">
-          Your information is secure and private
+          {t('loading.secure')}
         </p>
       </motion.div>
     </div>

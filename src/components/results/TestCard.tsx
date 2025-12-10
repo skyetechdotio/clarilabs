@@ -1,4 +1,5 @@
-import { ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronRight, Share2, Globe } from 'lucide-react';
 import type { LabTest } from '../../data/types';
 import { StatusBadge } from '../ui/Badge';
 import { RangeIndicator } from './RangeIndicator';
@@ -11,6 +12,17 @@ interface TestCardProps {
 
 export function TestCard({ test, onClick, compact = false }: TestCardProps) {
   const { name, shortName, value, unit, referenceRange, status } = test;
+  const [showTooltip, setShowTooltip] = useState<string | null>(null);
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    alert(`Sharing ${name} result with family...`);
+  };
+
+  const handleTranslate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    alert(`Translating ${name} explanation...`);
+  };
 
   if (compact) {
     return (
@@ -62,9 +74,45 @@ export function TestCard({ test, onClick, compact = false }: TestCardProps) {
         compact={false}
       />
 
-      <div className="flex items-center justify-end mt-3 text-sm text-primary">
-        <span>View details</span>
-        <ChevronRight className="w-4 h-4 ml-1" />
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100">
+        {/* Quick action buttons */}
+        <div className="flex items-center gap-1">
+          <div className="relative">
+            <button
+              onClick={handleTranslate}
+              onMouseEnter={() => setShowTooltip('translate')}
+              onMouseLeave={() => setShowTooltip(null)}
+              className="p-1.5 rounded-md hover:bg-neutral-100 transition-colors"
+            >
+              <Globe className="w-4 h-4 text-text-muted hover:text-primary" />
+            </button>
+            {showTooltip === 'translate' && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-text-primary text-white text-xs rounded whitespace-nowrap">
+                Translate
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <button
+              onClick={handleShare}
+              onMouseEnter={() => setShowTooltip('share')}
+              onMouseLeave={() => setShowTooltip(null)}
+              className="p-1.5 rounded-md hover:bg-neutral-100 transition-colors"
+            >
+              <Share2 className="w-4 h-4 text-text-muted hover:text-primary" />
+            </button>
+            {showTooltip === 'share' && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-text-primary text-white text-xs rounded whitespace-nowrap">
+                Share
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center text-sm text-primary">
+          <span>View details</span>
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </div>
       </div>
     </div>
   );

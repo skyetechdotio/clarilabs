@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { AlertCircle, CheckCircle, TrendingUp, TrendingDown, Minus, Info, Phone } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AlertCircle, CheckCircle, TrendingUp, TrendingDown, Minus, Info, Phone, Share2, Globe, ChevronDown, Sparkles, Mail, MessageCircle, Users } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
@@ -8,12 +9,42 @@ import { StatusBadge } from '../components/ui/Badge';
 import { DetailedRangeChart } from '../components/results/RangeIndicator';
 import { getTestById, getTestHistory, labCategories } from '../data/mockLabResults';
 
+// Language options for translation
+const languages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
+];
+
 export function TestDetailPage() {
   const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(languages[0]);
+  const [isTranslating, setIsTranslating] = useState(false);
 
   const test = getTestById(testId || '');
   const history = getTestHistory(testId || '');
+
+  const handleShare = (method: string) => {
+    setShowShareMenu(false);
+    alert(`Sharing ${test?.name} result via ${method}...`);
+  };
+
+  const handleLanguageChange = (language: typeof languages[0]) => {
+    setShowLanguageMenu(false);
+    if (language.code !== currentLanguage.code) {
+      setIsTranslating(true);
+      setTimeout(() => {
+        setCurrentLanguage(language);
+        setIsTranslating(false);
+      }, 1500);
+    }
+  };
 
   if (!test) {
     return (
@@ -124,6 +155,33 @@ export function TestDetailPage() {
           </Card>
         </motion.div>
 
+        {/* Translation Loading Overlay */}
+        <AnimatePresence>
+          {isTranslating && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center"
+            >
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                className="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center gap-4"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                >
+                  <Sparkles className="w-10 h-10 text-primary" />
+                </motion.div>
+                <p className="text-text-primary font-medium">AI is translating...</p>
+                <p className="text-sm text-text-secondary">This may take a moment</p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Explanation Section */}
         {explanation && (
           <motion.div
@@ -133,9 +191,107 @@ export function TestDetailPage() {
           >
             <Card className="mb-6 bg-primary/5 border border-primary/20">
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Info className="w-5 h-5 text-primary" />
-                  <CardTitle>What This Means for You</CardTitle>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-5 h-5 text-primary" />
+                    <CardTitle>What This Means for You</CardTitle>
+                  </div>
+
+                  {/* Translate & Share buttons */}
+                  <div className="flex items-center gap-2">
+                    {/* Language Selector */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors text-sm"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-primary" />
+                        <Globe className="w-3.5 h-3.5 text-text-secondary" />
+                        <span className="font-medium">{currentLanguage.flag}</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
+                      </button>
+
+                      <AnimatePresence>
+                        {showLanguageMenu && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 z-20"
+                          >
+                            <div className="px-3 py-2 border-b border-neutral-100">
+                              <div className="flex items-center gap-2 text-xs text-text-muted">
+                                <Sparkles className="w-3 h-3 text-primary" />
+                                <span>AI Translation</span>
+                              </div>
+                            </div>
+                            {languages.map((lang) => (
+                              <button
+                                key={lang.code}
+                                onClick={() => handleLanguageChange(lang)}
+                                className={`w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-2 ${
+                                  currentLanguage.code === lang.code ? 'bg-primary/5 text-primary' : ''
+                                }`}
+                              >
+                                <span>{lang.flag}</span>
+                                <span className="text-sm">{lang.name}</span>
+                                {currentLanguage.code === lang.code && (
+                                  <CheckCircle className="w-4 h-4 ml-auto" />
+                                )}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Share Button */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowShareMenu(!showShareMenu)}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span className="font-medium">Share</span>
+                      </button>
+
+                      <AnimatePresence>
+                        {showShareMenu && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 z-20"
+                          >
+                            <div className="px-3 py-2 border-b border-neutral-100">
+                              <p className="text-xs text-text-muted">Share with family</p>
+                            </div>
+                            <button
+                              onClick={() => handleShare('Email')}
+                              className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
+                            >
+                              <Mail className="w-4 h-4 text-text-secondary" />
+                              <span className="text-sm">Send via Email</span>
+                            </button>
+                            <button
+                              onClick={() => handleShare('Text Message')}
+                              className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
+                            >
+                              <MessageCircle className="w-4 h-4 text-text-secondary" />
+                              <span className="text-sm">Send via Text</span>
+                            </button>
+                            <button
+                              onClick={() => handleShare('Family Portal')}
+                              className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
+                            >
+                              <Users className="w-4 h-4 text-text-secondary" />
+                              <span className="text-sm">Add to Family Portal</span>
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

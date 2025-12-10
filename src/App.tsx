@@ -4,6 +4,7 @@ import { LoadingPage } from './pages/LoadingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TestDetailPage } from './pages/TestDetailPage';
 import { HistoryPage } from './pages/HistoryPage';
+import { LanguageProvider } from './context/LanguageContext';
 
 function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +40,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

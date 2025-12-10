@@ -1,12 +1,12 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Stethoscope, AlertCircle, CheckCircle, Phone, MapPin, Clock, Mail, Building, Share2, MessageCircle, Users, Globe, ChevronDown, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Calendar, Stethoscope, AlertCircle, CheckCircle, Phone, MapPin, Clock, Mail, Building } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { TestCard } from '../components/results/TestCard';
 import { patient, labCategories, getSummaryStats, getFlaggedTests } from '../data/mockLabResults';
+import { useLanguage } from '../context/LanguageContext';
 
 // Mock provider data with image URL
 const providerInfo = {
@@ -19,27 +19,14 @@ const providerInfo = {
   email: 'dr.chen@sunrisemedical.com',
   hours: 'Mon-Fri: 8:00 AM - 5:00 PM',
   nextAvailable: 'Tomorrow at 2:30 PM',
-  imageUrl: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face',
+  imageUrl: '/doctor.png',
 };
-
-// Language options for translation
-const languages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-  { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-];
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const stats = getSummaryStats();
   const flaggedTests = getFlaggedTests();
-  const [showShareMenu, setShowShareMenu] = useState(false);
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState(languages[0]);
-  const [isTranslating, setIsTranslating] = useState(false);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -49,152 +36,11 @@ export function DashboardPage() {
     });
   };
 
-  const handleShare = (method: string) => {
-    setShowShareMenu(false);
-    // Simulate share action
-    alert(`Sharing results via ${method}...`);
-  };
-
-  const handleLanguageChange = (language: typeof languages[0]) => {
-    setShowLanguageMenu(false);
-    if (language.code !== currentLanguage.code) {
-      setIsTranslating(true);
-      // Simulate AI translation
-      setTimeout(() => {
-        setCurrentLanguage(language);
-        setIsTranslating(false);
-      }, 1500);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Translation Loading Overlay */}
-      <AnimatePresence>
-        {isTranslating && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              className="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center gap-4"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-              >
-                <Sparkles className="w-10 h-10 text-primary" />
-              </motion.div>
-              <p className="text-text-primary font-medium">AI is translating your results...</p>
-              <p className="text-sm text-text-secondary">This may take a moment</p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Top Action Bar */}
-        <div className="flex items-center justify-end gap-3 mb-4">
-          {/* Language Selector */}
-          <div className="relative">
-            <button
-              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
-            >
-              <Sparkles className="w-4 h-4 text-primary" />
-              <Globe className="w-4 h-4 text-text-secondary" />
-              <span className="text-sm font-medium">{currentLanguage.flag} {currentLanguage.name}</span>
-              <ChevronDown className="w-4 h-4 text-text-muted" />
-            </button>
-
-            <AnimatePresence>
-              {showLanguageMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 z-20"
-                >
-                  <div className="px-3 py-2 border-b border-neutral-100">
-                    <div className="flex items-center gap-2 text-xs text-text-muted">
-                      <Sparkles className="w-3 h-3 text-primary" />
-                      <span>AI-Powered Translation</span>
-                    </div>
-                  </div>
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => handleLanguageChange(lang)}
-                      className={`w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-2 ${
-                        currentLanguage.code === lang.code ? 'bg-primary/5 text-primary' : ''
-                      }`}
-                    >
-                      <span>{lang.flag}</span>
-                      <span className="text-sm">{lang.name}</span>
-                      {currentLanguage.code === lang.code && (
-                        <CheckCircle className="w-4 h-4 ml-auto" />
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Share Button */}
-          <div className="relative">
-            <button
-              onClick={() => setShowShareMenu(!showShareMenu)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-            >
-              <Share2 className="w-4 h-4" />
-              <span className="text-sm font-medium">Share Results</span>
-            </button>
-
-            <AnimatePresence>
-              {showShareMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 z-20"
-                >
-                  <div className="px-3 py-2 border-b border-neutral-100">
-                    <p className="text-xs text-text-muted">Share with family or caregivers</p>
-                  </div>
-                  <button
-                    onClick={() => handleShare('Email')}
-                    className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
-                  >
-                    <Mail className="w-4 h-4 text-text-secondary" />
-                    <span className="text-sm">Send via Email</span>
-                  </button>
-                  <button
-                    onClick={() => handleShare('Text Message')}
-                    className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
-                  >
-                    <MessageCircle className="w-4 h-4 text-text-secondary" />
-                    <span className="text-sm">Send via Text</span>
-                  </button>
-                  <button
-                    onClick={() => handleShare('Family Portal')}
-                    className="w-full text-left px-3 py-2 hover:bg-neutral-50 flex items-center gap-3"
-                  >
-                    <Users className="w-4 h-4 text-text-secondary" />
-                    <span className="text-sm">Add to Family Portal</span>
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Content */}
           <main className="flex-1 min-w-0">
@@ -269,7 +115,7 @@ export function DashboardPage() {
                   </div>
                   <div>
                     <p className="text-3xl font-bold text-success">{stats.normal}</p>
-                    <p className="text-text-secondary">Tests in normal range</p>
+                    <p className="text-text-secondary">{t('dashboard.summary.normal')}</p>
                   </div>
                 </div>
               </Card>
@@ -283,7 +129,7 @@ export function DashboardPage() {
                     <p className={`text-3xl font-bold ${flaggedTests.length > 0 ? 'text-warning' : 'text-text-muted'}`}>
                       {stats.flagged}
                     </p>
-                    <p className="text-text-secondary">Tests to review with your doctor</p>
+                    <p className="text-text-secondary">{t('dashboard.summary.review')}</p>
                   </div>
                 </div>
               </Card>
@@ -299,10 +145,10 @@ export function DashboardPage() {
               >
                 <div className="flex items-center gap-2 mb-4">
                   <AlertCircle className="w-5 h-5 text-warning" />
-                  <h2 className="text-lg font-semibold text-text-primary">Items to Discuss</h2>
+                  <h2 className="text-lg font-semibold text-text-primary">{t('dashboard.flagged.title')}</h2>
                 </div>
                 <p className="text-text-secondary mb-4">
-                  These results are outside the normal range. Tap each one to learn more about what it means.
+                  {t('dashboard.flagged.subtitle')}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {flaggedTests.map((test) => (
@@ -322,7 +168,7 @@ export function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
             >
-              <h2 className="text-lg font-semibold text-text-primary mb-4">All Results</h2>
+              <h2 className="text-lg font-semibold text-text-primary mb-4">{t('dashboard.results.title')}</h2>
 
               {labCategories.map((category, categoryIndex) => (
                 <motion.div
@@ -398,8 +244,7 @@ export function DashboardPage() {
               transition={{ delay: 0.7 }}
               className="text-xs text-text-muted text-center pb-8"
             >
-              This information is for educational purposes only and is not a substitute for professional
-              medical advice. Always consult your healthcare provider with any questions about your results.
+              {t('detail.disclaimer')}
             </motion.p>
           </main>
 
@@ -413,7 +258,7 @@ export function DashboardPage() {
             >
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle className="text-base">Your Care Provider</CardTitle>
+                  <CardTitle className="text-base">{t('provider.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {/* Provider Avatar & Name */}
@@ -467,7 +312,7 @@ export function DashboardPage() {
                       className="flex items-center justify-center gap-2 w-full py-2.5 bg-neutral-100 text-text-primary rounded-lg hover:bg-neutral-200 transition-colors"
                     >
                       <Mail className="w-4 h-4" />
-                      <span className="font-medium">Send Message</span>
+                      <span className="font-medium">{t('provider.sendMessage')}</span>
                     </a>
                   </div>
                 </CardContent>
@@ -481,27 +326,18 @@ export function DashboardPage() {
                       <Calendar className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm text-text-muted">Next Available</p>
+                      <p className="text-sm text-text-muted">{t('provider.nextAvailable')}</p>
                       <p className="font-medium text-text-primary">{providerInfo.nextAvailable}</p>
                     </div>
                   </div>
-                  <button className="w-full py-2.5 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors font-medium">
-                    Schedule Follow-up
+                  <button className="w-full py-2.5 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors font-medium mb-4">
+                    {t('provider.scheduleFollowup')}
                   </button>
+                  <p className="text-sm text-text-secondary text-center">
+                    {t('provider.questions')}
+                  </p>
                 </CardContent>
               </Card>
-
-              {/* Questions CTA */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="mt-6 p-4 bg-neutral-100 rounded-lg"
-              >
-                <p className="text-sm text-text-secondary text-center">
-                  Have questions about your results? Your care team is here to help.
-                </p>
-              </motion.div>
             </motion.div>
           </aside>
         </div>
