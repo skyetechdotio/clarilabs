@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { TestCard } from '../components/results/TestCard';
 import { patient, labCategories, getSummaryStats, getFlaggedTests } from '../data/mockLabResults';
 import { useLanguage } from '../context/LanguageContext';
+import type { LabTest } from '../data/types';
 
 // Mock provider data with image URL
 const providerInfo = {
@@ -24,9 +25,12 @@ const providerInfo = {
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, tTestName, tCategoryName } = useLanguage();
   const stats = getSummaryStats();
   const flaggedTests = getFlaggedTests();
+
+  // Helper to get translated test name
+  const getTestName = (test: LabTest) => tTestName(test.id, test.name);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -181,7 +185,7 @@ export function DashboardPage() {
                   <Card>
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <CardTitle>{category.name}</CardTitle>
+                        <CardTitle>{tCategoryName(category.id, category.name)}</CardTitle>
                         <Badge variant="default">{category.shortName}</Badge>
                       </div>
                     </CardHeader>
@@ -217,7 +221,7 @@ export function DashboardPage() {
                                       : 'bg-warning'
                                   }`}
                                 />
-                                <span className="font-medium text-text-primary">{test.name}</span>
+                                <span className="font-medium text-text-primary">{getTestName(test)}</span>
                               </div>
                               <div className="flex items-center gap-4 pl-5 sm:pl-0">
                                 <span className="text-text-secondary font-medium">

@@ -1,4 +1,10 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
+import {
+  testNameTranslations,
+  testDescriptionTranslations,
+  testExplanationTranslations,
+  categoryNameTranslations
+} from '../data/translations';
 
 // Language options with flags for universal recognition
 export const languages = [
@@ -23,6 +29,10 @@ interface LanguageContextType {
   targetLanguage: Language | null;
   setTargetLanguage: (lang: Language | null) => void;
   t: (key: string) => string;
+  tTestName: (testId: string, fallback: string) => string;
+  tTestDescription: (testId: string, fallback: string) => string;
+  tTestExplanation: (testId: string, fallback: string) => string;
+  tCategoryName: (categoryId: string, fallback: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
@@ -565,6 +575,38 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return langTranslations?.[key] || translations.en[key] || key;
   };
 
+  const tTestName = (testId: string, fallback: string): string => {
+    const trans = testNameTranslations[testId];
+    if (trans) {
+      return trans[currentLanguage.code] || trans.en || fallback;
+    }
+    return fallback;
+  };
+
+  const tTestDescription = (testId: string, fallback: string): string => {
+    const trans = testDescriptionTranslations[testId];
+    if (trans) {
+      return trans[currentLanguage.code] || trans.en || fallback;
+    }
+    return fallback;
+  };
+
+  const tTestExplanation = (testId: string, fallback: string): string => {
+    const trans = testExplanationTranslations[testId];
+    if (trans) {
+      return trans[currentLanguage.code] || trans.en || fallback;
+    }
+    return fallback;
+  };
+
+  const tCategoryName = (categoryId: string, fallback: string): string => {
+    const trans = categoryNameTranslations[categoryId];
+    if (trans) {
+      return trans[currentLanguage.code] || trans.en || fallback;
+    }
+    return fallback;
+  };
+
   return (
     <LanguageContext.Provider
       value={{
@@ -575,6 +617,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         targetLanguage,
         setTargetLanguage,
         t,
+        tTestName,
+        tTestDescription,
+        tTestExplanation,
+        tCategoryName,
       }}
     >
       {children}

@@ -3,6 +3,7 @@ import { ChevronRight, Share2, Globe } from 'lucide-react';
 import type { LabTest } from '../../data/types';
 import { StatusBadge } from '../ui/Badge';
 import { RangeIndicator } from './RangeIndicator';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface TestCardProps {
   test: LabTest;
@@ -11,17 +12,21 @@ interface TestCardProps {
 }
 
 export function TestCard({ test, onClick, compact = false }: TestCardProps) {
-  const { name, shortName, value, unit, referenceRange, status } = test;
+  const { value, unit, referenceRange, status, shortName } = test;
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
+  const { tTestName, t } = useLanguage();
+
+  // Get translated test name
+  const testName = tTestName(test.id, test.name);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    alert(`Sharing ${name} result with family...`);
+    alert(`Sharing ${testName} result with family...`);
   };
 
   const handleTranslate = (e: React.MouseEvent) => {
     e.stopPropagation();
-    alert(`Translating ${name} explanation...`);
+    alert(`Translating ${testName} explanation...`);
   };
 
   if (compact) {
@@ -55,7 +60,7 @@ export function TestCard({ test, onClick, compact = false }: TestCardProps) {
     >
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h4 className="font-medium text-text-primary">{name}</h4>
+          <h4 className="font-medium text-text-primary">{testName}</h4>
           <p className="text-sm text-text-muted">{shortName}</p>
         </div>
         <StatusBadge status={status} />
@@ -88,7 +93,7 @@ export function TestCard({ test, onClick, compact = false }: TestCardProps) {
             </button>
             {showTooltip === 'translate' && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-text-primary text-white text-xs rounded whitespace-nowrap">
-                Translate
+                {t('action.translate')}
               </div>
             )}
           </div>
@@ -103,14 +108,14 @@ export function TestCard({ test, onClick, compact = false }: TestCardProps) {
             </button>
             {showTooltip === 'share' && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-text-primary text-white text-xs rounded whitespace-nowrap">
-                Share
+                {t('action.share')}
               </div>
             )}
           </div>
         </div>
 
         <div className="flex items-center text-sm text-primary">
-          <span>View details</span>
+          <span>{t('dashboard.viewDetails')}</span>
           <ChevronRight className="w-4 h-4 ml-1" />
         </div>
       </div>
