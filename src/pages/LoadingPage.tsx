@@ -77,12 +77,10 @@ export function LoadingPage({ onComplete, targetPath = '/results' }: LoadingPage
       }
       // Complete loading after all steps
       setTimeout(() => {
+        // Navigate first, then call onComplete to avoid race condition
+        navigate(targetPath, { replace: true });
         if (onComplete) {
           onComplete();
-          // Navigate to the target path after completing
-          navigate(targetPath, { replace: true });
-        } else {
-          navigate('/results');
         }
       }, 400);
     };
