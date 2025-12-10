@@ -18,6 +18,7 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { historicalData, getTestById } from '../data/mockLabResults';
+import { useLanguage } from '../context/LanguageContext';
 
 const testDates = [
   { date: '2024-12-08', label: 'December 8, 2024', isCurrent: true },
@@ -31,6 +32,7 @@ const trackedTests = ['glucose', 'ldl', 'cholesterol-total', 'tsh', 'vitamin-d',
 export function HistoryPage() {
   const navigate = useNavigate();
   const [selectedTest, setSelectedTest] = useState<string>('glucose');
+  const { t, tTestName, tTestDescription } = useLanguage();
 
   const testsWithHistory = trackedTests
     .map((id) => {
@@ -108,7 +110,7 @@ export function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header showBack title="Lab History" />
+      <Header showBack title={t('history.title')} />
 
       <PageContainer>
         {/* Timeline Selector */}
@@ -122,7 +124,7 @@ export function HistoryPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary" />
-                <CardTitle>Test History</CardTitle>
+                <CardTitle>{t('history.title')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -154,7 +156,7 @@ export function HistoryPage() {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="mb-6"
         >
-          <h2 className="text-lg font-semibold text-text-primary mb-3">Select a Test to View Trends</h2>
+          <h2 className="text-lg font-semibold text-text-primary mb-3">{t('history.selectTest')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {testsWithHistory.map(({ test, history }) => {
               if (!test) return null;
@@ -188,7 +190,7 @@ export function HistoryPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-text-muted truncate">{test.name}</p>
+                  <p className="text-sm text-text-muted truncate">{tTestName(test.id, test.name)}</p>
                 </div>
               );
             })}
@@ -207,15 +209,15 @@ export function HistoryPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>{selectedTestData.test?.name}</CardTitle>
+                    <CardTitle>{selectedTestData.test ? tTestName(selectedTestData.test.id, selectedTestData.test.name) : ''}</CardTitle>
                     <p className="text-sm text-text-muted mt-1">
-                      {selectedTestData.test?.description}
+                      {selectedTestData.test ? tTestDescription(selectedTestData.test.id, selectedTestData.test.description || '') : ''}
                     </p>
                   </div>
                   <Badge
                     variant={selectedTestData.test?.status === 'normal' ? 'success' : 'warning'}
                   >
-                    {selectedTestData.test?.status === 'normal' ? 'In Range' : 'Review'}
+                    {selectedTestData.test?.status === 'normal' ? t('range.normal') : t('status.elevated')}
                   </Badge>
                 </div>
               </CardHeader>
@@ -281,7 +283,7 @@ export function HistoryPage() {
                           y={refRange.low}
                           stroke="#4ECDC4"
                           strokeDasharray="5 5"
-                          label={{ value: 'Low', fill: '#4ECDC4', fontSize: 11 }}
+                          label={{ value: t('range.low'), fill: '#4ECDC4', fontSize: 11 }}
                         />
                       )}
                       {refRange?.high !== undefined && (
@@ -289,7 +291,7 @@ export function HistoryPage() {
                           y={refRange.high}
                           stroke="#4ECDC4"
                           strokeDasharray="5 5"
-                          label={{ value: 'High', fill: '#4ECDC4', fontSize: 11 }}
+                          label={{ value: t('range.high'), fill: '#4ECDC4', fontSize: 11 }}
                         />
                       )}
 
@@ -316,7 +318,7 @@ export function HistoryPage() {
                   onClick={() => navigate(`/results/${selectedTest}`)}
                   className="w-full mt-4 flex items-center justify-center gap-2 py-3 text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors"
                 >
-                  View Full Details
+                  {t('dashboard.viewDetails')}
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </CardContent>
@@ -332,7 +334,7 @@ export function HistoryPage() {
         >
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Key Insights</CardTitle>
+              <CardTitle>{t('history.keyInsights')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -345,6 +347,7 @@ export function HistoryPage() {
                   const firstValue = history[0].value;
                   const lastValue = history[history.length - 1].value;
                   const totalChange = (((lastValue - firstValue) / firstValue) * 100).toFixed(1);
+                  const testNameTranslated = tTestName(test.id, test.name);
 
                   return (
                     <div
@@ -355,11 +358,11 @@ export function HistoryPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-medium text-text-primary">{test.name}</p>
+                          <p className="font-medium text-text-primary">{testNameTranslated}</p>
                           <p className="text-sm text-text-secondary mt-1">
                             {isPositive
-                              ? `Your ${test.shortName} has ${trend.direction === 'down' ? 'decreased' : 'increased'} ${Math.abs(Number(totalChange))}% since Dec 2023`
-                              : `Your ${test.shortName} has ${trend.direction === 'up' ? 'increased' : 'decreased'} ${Math.abs(Number(totalChange))}% since Dec 2023`}
+                              ? `${test.shortName} ${trend.direction === 'down' ? '↓' : '↑'} ${Math.abs(Number(totalChange))}%`
+                              : `${test.shortName} ${trend.direction === 'up' ? '↑' : '↓'} ${Math.abs(Number(totalChange))}%`}
                           </p>
                         </div>
                         <span
@@ -388,8 +391,7 @@ export function HistoryPage() {
           transition={{ delay: 0.5 }}
           className="text-xs text-text-muted text-center pb-8"
         >
-          Historical trends are for reference only. Individual results should be interpreted
-          by your healthcare provider in the context of your overall health.
+          {t('detail.disclaimer')}
         </motion.p>
       </PageContainer>
     </div>

@@ -99,28 +99,25 @@ export function LoadingPage({ onComplete, targetPath = '/results' }: LoadingPage
   const currentStepData = loadingSteps[currentStep];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
-      {/* Logo */}
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 relative">
+      {/* Logo - Small, subtle, top-left corner */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="absolute top-6 left-6"
       >
         <img
           src="/logo.png"
           alt="ClariLabs"
-          className="h-20 mx-auto mb-4"
+          className="h-8 opacity-60"
         />
-        <p className="text-text-secondary text-center">
-          Clarity for your labs, right when you need it.
-        </p>
       </motion.div>
 
-      {/* Loading Animation */}
+      {/* Main Content - The Journey (centered, hero focus) */}
       <div className="w-full max-w-md">
-        {/* Animated Icon */}
-        <div className="flex justify-center mb-8">
+        {/* Animated Icon - Large and prominent */}
+        <div className="flex justify-center mb-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -128,7 +125,7 @@ export function LoadingPage({ onComplete, targetPath = '/results' }: LoadingPage
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
               exit={{ scale: 0.8, opacity: 0, rotate: 10 }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="w-24 h-24 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center shadow-lg"
+              className="w-28 h-28 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center shadow-lg"
             >
               <motion.div
                 animate={{
@@ -140,14 +137,14 @@ export function LoadingPage({ onComplete, targetPath = '/results' }: LoadingPage
                   ease: 'easeInOut',
                 }}
               >
-                <CurrentIcon className="w-12 h-12 text-primary" strokeWidth={1.5} />
+                <CurrentIcon className="w-14 h-14 text-primary" strokeWidth={1.5} />
               </motion.div>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Status Messages */}
-        <div className="text-center mb-8 min-h-[80px]">
+        {/* Status Messages - The main focus */}
+        <div className="text-center mb-10 min-h-[100px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -156,10 +153,10 @@ export function LoadingPage({ onComplete, targetPath = '/results' }: LoadingPage
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.3 }}
             >
-              <p className="text-xl font-medium text-text-primary mb-2">
+              <p className="text-2xl font-semibold text-text-primary mb-3">
                 {currentStepData?.message}
               </p>
-              <p className="text-text-secondary">
+              <p className="text-lg text-text-secondary">
                 {currentStepData?.subMessage}
               </p>
             </motion.div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, History, LayoutDashboard, Globe, Sparkles, Check } from 'lucide-react';
+import { ArrowLeft, History, LayoutDashboard, Sparkles, Check } from 'lucide-react';
 import { useLanguage, languages } from '../../context/LanguageContext';
 
 interface HeaderProps {
@@ -97,7 +97,7 @@ export function Header({ showBack = false, title }: HeaderProps) {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 transition-colors border border-neutral-200"
                   title="Translate this page"
                 >
-                  <Globe className="w-4 h-4 text-primary" />
+                  <Sparkles className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium text-text-primary">{currentLanguage.nativeName}</span>
                   <span className="text-base">{currentLanguage.flag}</span>
                 </button>
